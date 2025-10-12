@@ -26,7 +26,7 @@ jobs:
           echo "apps=${app_list}" | tee -a "$GITHUB_OUTPUT"
 
   
-  download-apps:
+  release:
     needs: list-apps
     runs-on: ubuntu-latest
     strategy:

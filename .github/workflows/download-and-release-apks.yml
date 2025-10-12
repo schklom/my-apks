@@ -24,7 +24,6 @@ jobs:
         run: |
           app_list=$(cat apps.txt | jq -R -s -c 'split("\n")[:-1]')
           echo "apps=${app_list}" | tee -a "$GITHUB_OUTPUT"
-
   
   release:
     needs: list-apps
@@ -38,11 +37,13 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      - name: Get APK
+      - name: Prepare folder
         run: |
           echo "apk_dir_path=${{ matrix.app }} | tee -a "$GITHUB_ENV"
-          mkdir "${{ env.apk_dir_path }}"
+          mkdir "${{ matrix.app }}"
 
+      - name: Get APK
+        run: |
           # https://github.com/EFForg/apkeep
           docker run \
             --rm \

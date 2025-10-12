@@ -83,6 +83,8 @@ jobs:
 
       - name: Read current and new hash of apk
         run: |
+          echo "Listing files"
+          ls -hl ${{ env.apk_dir_path }}
           # Create hash_current_file if it doesn't exist
           touch ${{ env.apk_dir_path }}/hash_current_file
           echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" | tee -a "$GITHUB_ENV"

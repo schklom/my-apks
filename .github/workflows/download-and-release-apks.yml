@@ -22,10 +22,22 @@ jobs:
       apps: ${{ steps.set-matrix.outputs.apps }}
     steps:
       - uses: actions/checkout@v4
-      - id: set-matrix
+      - name: set-matrix
+        id: set-matrix
         run: |
           app_list=$(cat apps.txt | jq -R -s -c 'split("\n")[:-1]')
           echo "apps=${app_list}" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Download apkeep
+        run: |
+          # https://github.com/EFForg/apkeep
+          #docker run \
+          #  --rm \
+          #  -v ${{ env.apk_dir_path }}:/output \
+          #  ghcr.io/efforg/apkeep:stable \
+
+          curl -L -o apkeep "https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu"
+          chmod +x apkeep
   
   release:
     needs: list-apps
@@ -34,6 +46,11 @@ jobs:
       fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
         app: ${{ fromJSON(needs.list-apps.outputs.apps) }}
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -46,14 +63,6 @@ jobs:
 
       - name: Get APK
         run: |
-          # https://github.com/EFForg/apkeep
-          #docker run \
-          #  --rm \
-          #  -v ${{ env.apk_dir_path }}:/output \
-          #  ghcr.io/efforg/apkeep:stable \
-
-          curl -L -o apkeep "https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu"
-          chmod +x apkeep
           ./apkeep \
             -a ${{ matrix.app }} \
             -d apk-pure \

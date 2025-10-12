@@ -111,6 +111,9 @@ jobs:
           last_update="${{ env.last_update_date_env }}"
           tagname="${{ matrix.app }}_${ver}_${last_update}"
           echo "tagname=${tagname}" | tee -a "$GITHUB_ENV"
+
+      - name: Update to get other matrix job changes
+        run: git pull
       
       - name: Commit and push the change
         if: ${{ env.current_hash != env.new_hash }}

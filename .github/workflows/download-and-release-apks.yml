@@ -27,17 +27,6 @@ jobs:
         run: |
           app_list=$(cat apps.txt | jq -R -s -c 'split("\n")[:-1]')
           echo "apps=${app_list}" | tee -a "$GITHUB_OUTPUT"
-
-      - name: Download apkeep
-        run: |
-          # https://github.com/EFForg/apkeep
-          #docker run \
-          #  --rm \
-          #  -v ${{ env.apk_dir_path }}:/output \
-          #  ghcr.io/efforg/apkeep:stable \
-
-          curl -L -o apkeep "https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu"
-          chmod +x apkeep
   
   release:
     needs: list-apps
@@ -55,6 +44,17 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v5
+
+      - name: Download apkeep
+        run: |
+          # https://github.com/EFForg/apkeep
+          #docker run \
+          #  --rm \
+          #  -v ${{ env.apk_dir_path }}:/output \
+          #  ghcr.io/efforg/apkeep:stable \
+
+          curl -sSL -o apkeep "https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu"
+          chmod +x apkeep
 
       - name: Prepare folder
         run: |

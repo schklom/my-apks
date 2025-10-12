@@ -45,14 +45,21 @@ jobs:
       - name: Get APK
         run: |
           # https://github.com/EFForg/apkeep
-          docker run \
-            --rm \
-            -v ${{ env.apk_dir_path }}:/output \
-            ghcr.io/efforg/apkeep:stable \
-              -a ${{ matrix.app }} \
-              -d apk-pure /output
+          #docker run \
+          #  --rm \
+          #  -v ${{ env.apk_dir_path }}:/output \
+          #  ghcr.io/efforg/apkeep:stable \
 
-          echo "apk_file_path=$(ls ${{ matrix.app }}/*apk) | tee -a "$GITHUB_ENV"
+          curl -L -o apkeep "https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu"
+          chmod +x apkeep
+          ./apkeep \
+            -a ${{ matrix.app }} \
+            -d apk-pure ${{ env.apk_dir_path }}
+
+          echo "ls ${{ env.apk_dir_path }}/*apk"
+          ls ${{ env.apk_dir_path }}/*apk
+
+          echo "apk_file_path=$(ls ${{ env.apk_dir_path }}/*apk) | tee -a "$GITHUB_ENV"
 
       - name: Store md5 hash of new apk
         run: |

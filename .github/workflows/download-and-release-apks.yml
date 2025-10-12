@@ -35,6 +35,7 @@ jobs:
       fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
         app: ${{ fromJSON(needs.list-apps.outputs.apps) }}
+      max-parallel: 1 # Ensure commits and releases don't happen simultaneously
 
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the
@@ -115,9 +116,9 @@ jobs:
         if: ${{ env.current_hash != env.new_hash }}
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "Update the apk's hash and update date"
+          commit_message: "Update ${{ matrix.app }}'s hash and update date"
           file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/last_update_date'
-        
+      
       - name: Release apk if hashes are different
         if: ${{ env.current_hash != env.new_hash }}
         uses: softprops/action-gh-release@v2

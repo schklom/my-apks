@@ -117,6 +117,8 @@ jobs:
           else
             echo "${file} is not an .xapk file."
           fi
+
+          echo "VARIABLE file = $file"
           
           # get versionName string, remove "versionName=, remove "'". This is more readable than lookaheads/lookbehinds
           version=`aapt dump badging ${file} | grep -Po "versionName='.+?'" | sed "s/versionName=//" | sed "s/'//g"`

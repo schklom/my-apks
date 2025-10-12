@@ -113,12 +113,17 @@ jobs:
             unzip "$file" -d "$folder"
             echo "Unzipped $file to folder $folder"
 
-            file=`find ${folder} -name "${folder}.apk"`
+            echo "Find apk"
+            find "${folder}" -name "${{ matrix.app }}.apk"
+
+            echo "tree"
+            tree -aF "${folder}"
+
+            file=`find "${folder}" -name "${{ matrix.app }}.apk"`
+            echo "VARIABLE file = $file"
           else
             echo "${file} is not an .xapk file."
           fi
-
-          echo "VARIABLE file = $file"
           
           # get versionName string, remove "versionName=, remove "'". This is more readable than lookaheads/lookbehinds
           version=`aapt dump badging ${file} | grep -Po "versionName='.+?'" | sed "s/versionName=//" | sed "s/'//g"`

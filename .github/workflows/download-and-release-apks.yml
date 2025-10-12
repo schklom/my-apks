@@ -21,7 +21,7 @@ jobs:
     outputs:
       apps: ${{ steps.set-matrix.outputs.apps }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: set-matrix
         id: set-matrix
         run: |
@@ -54,7 +54,7 @@ jobs:
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Prepare folder
         run: |

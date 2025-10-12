@@ -57,11 +57,8 @@ jobs:
             -d apk-pure \
             ${{ env.apk_dir_path }}
 
-          echo "ls ${{ env.apk_dir_path }}/*apk"
-          ls ${{ env.apk_dir_path }}/*apk
-
-          file_path=`ls ${{ env.apk_dir_path }} | grep "apk$"`
-          echo "apk_file_path=${file_path} | tee -a "$GITHUB_ENV"
+          file_path=`ls ${{ env.apk_dir_path }}/*apk`
+          echo "apk_file_path=${file_path}" | tee -a "$GITHUB_ENV"
 
       - name: Store md5 hash of new apk
         run: |

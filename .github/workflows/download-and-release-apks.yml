@@ -39,7 +39,7 @@ jobs:
 
       - name: Prepare folder
         run: |
-          echo "apk_dir_path=${{ matrix.app }} | tee -a "$GITHUB_ENV"
+          echo "apk_dir_path=${{ matrix.app }}" | tee -a "$GITHUB_ENV"
           mkdir "${{ matrix.app }}"
 
       - name: Get APK

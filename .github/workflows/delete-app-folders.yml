@@ -1,0 +1,28 @@
+name: Delete app folders
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  
+  delete-folders:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v5
+
+      - name: Delete folders with names in apps.txt
+        run: xargs rm -rf < apps.txt
+      
+      - name: Commit and push the change
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "Delete all app folders (in apps.txt)"

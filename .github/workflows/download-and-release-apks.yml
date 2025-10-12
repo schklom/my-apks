@@ -19,11 +19,21 @@ jobs:
     outputs:
       apps: ${{ steps.set-matrix.outputs.apps }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: set-matrix
         run: |
+          echo "cat apps.txt"
+          cat apps.txt
+
+          echo 'part 2'
+          cat apps.txt | jq -R -s -c 'split("\n")[:-1]'
+
           app_list=$(cat apps.txt | jq -R -s -c 'split("\n")[:-1]')
-          echo "apps=$app_list" >> $GITHUB_OUTPUT
+          
+          echo app_list
+          echo ${app_list}
+          
+          echo "apps=${app_list}" >> $GITHUB_OUTPUT
 
   
   download-apps:

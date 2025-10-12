@@ -1,0 +1,108 @@
+name: Download and release APKs
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '2 0 * * MON,WED,FRI,SUN'
+    
+  push:
+    branches: main
+    paths: apps.txt
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  list-apps:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.set-matrix.outputs.apps }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: set-matrix
+        run: |
+          app_list=$(cat apps.txt | jq -R -s -c 'split("\n")[:-1]')
+          echo "apps=$app_list" >> $GITHUB_OUTPUT
+
+  
+  download-apps:
+    needs: list-apps
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.generate-matrix.outputs.apps) }}
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: Get APK
+        run: |
+          echo "apk_dir_path=${{ matrix.app }} >> $GITHUB_ENV
+          mkdir ${{ env.apk_dir_path }}
+
+          # https://github.com/EFForg/apkeep
+          docker run \
+            --rm \
+            -v ${{ env.apk_dir_path }}:/output \
+            ghcr.io/efforg/apkeep:stable \
+              -a ${{ matrix.app }} \
+              -d apk-pure /output
+
+          echo "apk_file_path=$(ls ${{ matrix.app }}/*apk) >> $GITHUB_ENV
+
+      - name: Store md5 hash of new apk
+        run: |
+          md5sum "${{ env.apk_file_path }}" | cut -d " " -f 1 > ${{ env.apk_dir_path }}/hash_new_file
+
+      - name: Read current and new hash of apk
+        run: |
+          # Create hash_current_file if it doesn't exist
+          touch ${{ env.apk_dir_path }}/hash_current_file
+          echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" >> $GITHUB_ENV
+          echo "new_hash=$(cat ${{ env.apk_dir_path }}/hash_new_file)" >> $GITHUB_ENV
+      
+      - name: Record last update date and update current hash
+        if: ${{ env.current_hash != env.new_hash }}
+        run: |
+          date +%Y-%m-%d_%H-%M > ${{ env.apk_dir_path }}/last_update_date
+          echo "last_update_date_env=$(cat ${{ env.apk_dir_path }}/last_update_date)" >> $GITHUB_ENV
+          mv ${{ env.apk_dir_path }}/hash_new_file ${{ env.apk_dir_path }}/hash_current_file
+      
+      # https://code.whatever.social/questions/13469147/get-android-apk-file-versionname-or-versioncode-without-installing-apk
+      - name: Find version number
+        if: ${{ env.current_hash != env.new_hash }}
+        run: |
+          sudo apt install -y aapt
+          ls -alh
+          # get versionName string, remove "versionName=, remove "'". This is more readable than lookaheads/lookbehinds
+          version=`aapt dump badging ${{ env.apk_file_path }} | grep -Po "versionName='.+?'" | sed "s/versionName=//" | sed "s/'//g"`
+          echo "version=${version}" >> $GITHUB_ENV
+#          unzip -d apk_files ${{ env.filename }}
+#          echo "version=$(grep "Version" apk_files/assets/about.html | grep -oP '[0-9\.]+')" >> $GITHUB_ENV
+#          rm -rf apk_files
+
+      - name: Write tag name
+        if: ${{ env.current_hash != env.new_hash }}
+        #run: echo "tagname=${{ env.version }}_${{ env.last_update_date_env }}" >> $GITHUB_ENV
+        run: |
+          ver="${{ env.version }}"
+          last_update="${{ env.last_update_date_env }}"
+          tagname="${ver}_${last_update}"
+          echo "tagname=${tagname}" >> $GITHUB_ENV
+      
+      - name: Commit and push the change
+        if: ${{ env.current_hash != env.new_hash }}
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "Update the apk's hash and update date"
+          file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/last_update_date'
+        
+      - name: Release apk if hashes are different
+        if: ${{ env.current_hash != env.new_hash }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.tagname }}
+          body: "New version of ${{ matrix.app }}"
+          files: ${{ env.apk_file_path }}

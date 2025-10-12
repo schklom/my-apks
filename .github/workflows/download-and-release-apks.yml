@@ -101,8 +101,25 @@ jobs:
         run: |
           sudo apt install -y aapt
           tree -aF ${{ matrix.app }}
+
+          # If it is a .xapk file, unzip it and find the version in the extracted apk
+          file=${{ env.apk_file_path }}
+
+          # Check if file extension is xapk
+          if [[ "$file" == *.xapk ]]; then
+            # Remove .xapk extension for folder name
+            folder="${file%.xapk}"
+            # Unzip the file to the new folder
+            unzip "$file" -d "$folder"
+            echo "Unzipped $file to folder $folder"
+
+            file=`find ${folder} -name "${folder}.apk"`
+          else
+            echo "${file} is not an .xapk file."
+          fi
+          
           # get versionName string, remove "versionName=, remove "'". This is more readable than lookaheads/lookbehinds
-          version=`aapt dump badging ${{ env.apk_file_path }} | grep -Po "versionName='.+?'" | sed "s/versionName=//" | sed "s/'//g"`
+          version=`aapt dump badging ${file} | grep -Po "versionName='.+?'" | sed "s/versionName=//" | sed "s/'//g"`
           echo "version=${version}" | tee -a "$GITHUB_ENV"
 #          unzip -d apk_files ${{ env.filename }}
 #          echo "version=$(grep "Version" apk_files/assets/about.html | grep -oP '[0-9\.]+')" >> $GITHUB_ENV

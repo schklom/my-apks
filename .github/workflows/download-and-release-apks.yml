@@ -161,8 +161,7 @@ jobs:
 
       # https://github.com/marketplace/actions/gh-release#outputs
       - name: Add the download link to docs/index.html
-        #if: ${{ env.current_hash != env.new_hash }}
-        if: false
+        if: ${{ env.current_hash != env.new_hash }}
         run: |
           file="docs/index.html"
           url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
@@ -200,10 +199,16 @@ jobs:
 
           # Add the line
           sed -i "${where_to_add}i"<(echo "$what_to_add") $file
+
+
+
+          echo 'echo $file'
+          echo "$file"
           
       
       - name: Commit and push the change
-        if: ${{ env.current_hash != env.new_hash }}
+        #if: ${{ env.current_hash != env.new_hash }}
+        if: false
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Update ${{ matrix.app }}'s hash and update date and add link to docs/index.html"

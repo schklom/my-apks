@@ -216,8 +216,8 @@ jobs:
 
 
 
-          echo 'echo $file'
-          echo "$file"
+          echo 'cat $file'
+          cat "$file"
           
       
       - name: Commit and push the change

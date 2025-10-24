@@ -71,6 +71,16 @@ jobs:
         run: |
           ./apkeep -a ${{ matrix.app }} -l . | tail -n 1 | grep -oP '[\d+.]+' | sort -V | tail -n 1 > ${{ env.apk_dir_path }}/version_new_file
 
+      - name: Get current and new version of apk
+        run: |
+          # Create current files if they don't exist
+          touch ${{ env.apk_dir_path }}/hash_current_file
+          touch ${{ env.apk_dir_path }}/version_current_file
+          echo "current_version=$(cat ${{ env.apk_dir_path }}/version_current_file)" | tee -a "$GITHUB_ENV"
+          echo "new_version=$(cat ${{ env.apk_dir_path }}/version_new_file)" | tee -a "$GITHUB_ENV"
+          echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" | tee -a "$GITHUB_ENV"
+          echo "new_hash=$(cat ${{ env.apk_dir_path }}/hash_new_file)" | tee -a "$GITHUB_ENV"
+
       - name: Get APK
         if: ${{ env.current_version != env.new_version }}
         run: |
@@ -86,26 +96,14 @@ jobs:
         if: ${{ env.current_version != env.new_version }}
         run: |
           md5sum "${{ env.apk_file_path }}" | cut -d " " -f 1 > ${{ env.apk_dir_path }}/hash_new_file
-
-      - name: Read current and new version of apk
-        if: ${{ env.current_version != env.new_version }}
-        run: |
-          echo "Listing files"
-          ls -hl ${{ env.apk_dir_path }}
-          # Create current files if they don't exist
-          touch ${{ env.apk_dir_path }}/hash_current_file
-          touch ${{ env.apk_dir_path }}/version_current_file
-          echo "current_version=$(cat ${{ env.apk_dir_path }}/version_current_file)" | tee -a "$GITHUB_ENV"
-          echo "new_version=$(cat ${{ env.apk_dir_path }}/version_new_file)" | tee -a "$GITHUB_ENV"
-          echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" | tee -a "$GITHUB_ENV"
-          echo "new_hash=$(cat ${{ env.apk_dir_path }}/hash_new_file)" | tee -a "$GITHUB_ENV"
       
-      - name: Record last update date and update current hash
+      - name: Record last update date and update current hash+version
         if: ${{ env.current_version != env.new_version }}
         run: |
           date +%Y-%m-%d_%H-%M > ${{ env.apk_dir_path }}/last_update_date
           echo "last_update_date_env=$(cat ${{ env.apk_dir_path }}/last_update_date)" | tee -a "$GITHUB_ENV"
           mv ${{ env.apk_dir_path }}/hash_new_file ${{ env.apk_dir_path }}/hash_current_file
+          mv ${{ env.apk_dir_path }}/version_new_file ${{ env.apk_dir_path }}/version_current_file
 
       - name: Find file extension
         if: ${{ env.current_version != env.new_version }}

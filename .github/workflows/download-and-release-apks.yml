@@ -67,7 +67,12 @@ jobs:
           echo "apk_dir_path=${{ matrix.app }}" | tee -a "$GITHUB_ENV"
           mkdir -p "${{ matrix.app }}"
 
+      - name: Store version of new apk
+        run: |
+          ./apkeep -a ${{ matrix.app }} -l . | tail -n 1 | grep -oP '[\d+.]+' | sort -V | tail -n 1 > ${{ env.apk_dir_path }}/version_new_file
+
       - name: Get APK
+        if: ${{ env.current_version != env.new_version }}
         run: |
           ./apkeep \
             -a ${{ matrix.app }} \
@@ -78,70 +83,79 @@ jobs:
           echo "apk_file_path=${file_path}" | tee -a "$GITHUB_ENV"
 
       - name: Store md5 hash of new apk
+        if: ${{ env.current_version != env.new_version }}
         run: |
           md5sum "${{ env.apk_file_path }}" | cut -d " " -f 1 > ${{ env.apk_dir_path }}/hash_new_file
 
-      - name: Read current and new hash of apk
+      - name: Read current and new version of apk
+        if: ${{ env.current_version != env.new_version }}
         run: |
           echo "Listing files"
           ls -hl ${{ env.apk_dir_path }}
-          # Create hash_current_file if it doesn't exist
+          # Create current files if they don't exist
           touch ${{ env.apk_dir_path }}/hash_current_file
+          touch ${{ env.apk_dir_path }}/version_current_file
+          echo "current_version=$(cat ${{ env.apk_dir_path }}/version_current_file)" | tee -a "$GITHUB_ENV"
+          echo "new_version=$(cat ${{ env.apk_dir_path }}/version_new_file)" | tee -a "$GITHUB_ENV"
           echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" | tee -a "$GITHUB_ENV"
           echo "new_hash=$(cat ${{ env.apk_dir_path }}/hash_new_file)" | tee -a "$GITHUB_ENV"
       
       - name: Record last update date and update current hash
-        if: ${{ env.current_hash != env.new_hash }}
+        if: ${{ env.current_version != env.new_version }}
         run: |
           date +%Y-%m-%d_%H-%M > ${{ env.apk_dir_path }}/last_update_date
           echo "last_update_date_env=$(cat ${{ env.apk_dir_path }}/last_update_date)" | tee -a "$GITHUB_ENV"
           mv ${{ env.apk_dir_path }}/hash_new_file ${{ env.apk_dir_path }}/hash_current_file
-      
-      # https://code.whatever.social/questions/13469147/get-android-apk-file-versionname-or-versioncode-without-installing-apk
-      - name: Find version number
-        if: ${{ env.current_hash != env.new_hash }}
+
+      - name: Find file extension
+        if: ${{ env.current_version != env.new_version }}
         run: |
-          sudo apt install -y aapt
-          tree -aF ${{ matrix.app }}
-
-          # If it is a .xapk file, unzip it and find the version in the extracted apk
           file=${{ env.apk_file_path }}
-
           echo "file_extension=${file##*.}" | tee -a "$GITHUB_ENV"
-
-          # Check if file extension is xapk
-          if [[ "$file" == *.xapk ]]; then
-            
-            # Remove .xapk extension for folder name
-            folder="${file%.xapk}"
-            # Unzip the file to the new folder
-            unzip "$file" -d "$folder"
-            echo "Unzipped $file to folder $folder"
-
-            echo "Find apk"
-            find "${folder}" -name "${{ matrix.app }}.apk"
-
-            echo "tree"
-            tree -aF "${folder}"
-
-            file=`find "${folder}" -name "${{ matrix.app }}.apk"`
-            echo "VARIABLE file = $file"
-          else
-            echo "${file} is not an .xapk file."
-          fi
-          
-          # get versionName string, remove "versionName=, remove "'". This is more readable than lookaheads/lookbehinds
-          version=`aapt dump badging ${file} | grep -Po "versionName='.+?'" | sed "s/versionName=//" | sed "s/'//g"`
-          echo "version=${version}" | tee -a "$GITHUB_ENV"
-#          unzip -d apk_files ${{ env.filename }}
-#          echo "version=$(grep "Version" apk_files/assets/about.html | grep -oP '[0-9\.]+')" >> $GITHUB_ENV
-#          rm -rf apk_files
+      
+#      # https://code.whatever.social/questions/13469147/get-android-apk-file-versionname-or-versioncode-without-installing-apk
+#      - name: Find version number
+#        if: ${{ env.current_version != env.new_version }}
+#        run: |
+#          sudo apt install -y aapt
+#          tree -aF ${{ matrix.app }}
+#
+#          # If it is a .xapk file, unzip it and find the version in the extracted apk
+#          file=${{ env.apk_file_path }}
+#
+#          # Check if file extension is xapk
+#          if [[ "$file" == *.xapk ]]; then
+#            
+#            # Remove .xapk extension for folder name
+#            folder="${file%.xapk}"
+#            # Unzip the file to the new folder
+#            unzip "$file" -d "$folder"
+#            echo "Unzipped $file to folder $folder"
+#
+#            echo "Find apk"
+#            find "${folder}" -name "${{ matrix.app }}.apk"
+#
+#            echo "tree"
+#            tree -aF "${folder}"
+#
+#            file=`find "${folder}" -name "${{ matrix.app }}.apk"`
+#            echo "VARIABLE file = $file"
+#          else
+#            echo "${file} is not an .xapk file."
+#          fi
+#          
+#          # get versionName string, remove "versionName=, remove "'". This is more readable than lookaheads/lookbehinds
+#          version=`aapt dump badging ${file} | grep -Po "versionName='.+?'" | sed "s/versionName=//" | sed "s/'//g"`
+#          echo "version=${version}" | tee -a "$GITHUB_ENV"
+##          unzip -d apk_files ${{ env.filename }}
+##          echo "version=$(grep "Version" apk_files/assets/about.html | grep -oP '[0-9\.]+')" >> $GITHUB_ENV
+##          rm -rf apk_files
 
       - name: Write tag name
-        if: ${{ env.current_hash != env.new_hash }}
-        #run: echo "tagname=${{ env.version }}_${{ env.last_update_date_env }}" >> $GITHUB_ENV
+        if: ${{ env.current_version != env.new_version }}
+        #run: echo "tagname=${{ env.new_version }}_${{ env.last_update_date_env }}" >> $GITHUB_ENV
         run: |
-          ver="${{ env.version }}"
+          ver="${{ env.new_version }}"
           last_update="${{ env.last_update_date_env }}"
           tagname="${{ matrix.app }}_${ver}_${last_update}"
           echo "tagname=${tagname}" | tee -a "$GITHUB_ENV"
@@ -150,7 +164,7 @@ jobs:
         run: git pull
           
       - name: Release apk if hashes are different
-        if: ${{ env.current_hash != env.new_hash }}
+        if: ${{ env.current_version != env.new_version }}
         id: release-apk
         uses: softprops/action-gh-release@v2
         with:
@@ -160,7 +174,7 @@ jobs:
 
       # https://github.com/marketplace/actions/gh-release#outputs
       - name: Add the download link to docs/index.html
-        if: ${{ env.current_hash != env.new_hash }}
+        if: ${{ env.current_version != env.new_version }}
         run: |
           file="docs/index.html"
           url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
@@ -183,8 +197,8 @@ jobs:
           
       
       - name: Commit and push the change
-        if: ${{ env.current_hash != env.new_hash }}
+        if: ${{ env.current_version != env.new_version }}
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "Update ${{ matrix.app }}'s hash and update date and add link to docs/index.html"
-          file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/last_update_date docs/index.html'
+          commit_message: "Update ${{ matrix.app }}'s hash and version update date and add link to docs/index.html"
+          file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/version_current_file ${{ env.apk_dir_path }}/last_update_date docs/index.html'

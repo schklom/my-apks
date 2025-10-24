@@ -107,8 +107,11 @@ jobs:
           # If it is a .xapk file, unzip it and find the version in the extracted apk
           file=${{ env.apk_file_path }}
 
+          echo "file_extension=${file##*.}" | tee -a "$GITHUB_ENV"
+
           # Check if file extension is xapk
           if [[ "$file" == *.xapk ]]; then
+            
             # Remove .xapk extension for folder name
             folder="${file%.xapk}"
             # Unzip the file to the new folder
@@ -156,13 +159,30 @@ jobs:
           files: ${{ env.apk_file_path }}
 
       # https://github.com/marketplace/actions/gh-release#outputs
-      - name: Create the download link
+      - name: Add the download link to docs/index.html
         if: ${{ env.current_hash != env.new_hash }}
-        run: echo ${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }} > "${{ env.apk_dir_path }}/download_link"
+        run: |
+          file="docs/index.html"
+          url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
+          what_to_add='    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>'
+
+          # Add before existing links if they exist
+          line_where_to_add=`grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":" | head -n 1`
+
+          # if none exists, add after <body> (before that line+1, so that we can apply -1 after regardless)
+          line_body_plus_one=`grep -n "<body>" $file | cut -f 1 -d ":" | head -n 1`
+          line_body_plus_one=$((line_body_plus_one + 1))
+          
+          where_to_add=${line_where_to_add:-line_body_plus_one"}
+          where_to_add=$((where_to_add - 1))
+
+          # Add the line
+          sed -i "${line_where_to_add}i"<(echo "$what_to_add") $file
+          
       
       - name: Commit and push the change
         if: ${{ env.current_hash != env.new_hash }}
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Update ${{ matrix.app }}'s hash and update date"
-          file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/last_update_date ${{ env.apk_dir_path }}/download_link'
+          file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/last_update_date docs/index.html'

@@ -164,14 +164,13 @@ jobs:
         run: |
           file="docs/index.html"
           url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
-          what_to_add='    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>'
+          what_to_add="    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>"
 
           # Add before existing links if they exist
           line_where_to_add_plus_one=`grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":" | head -n 1`
 
           # if none exists, add after <body> (before that line+1, so that we can apply -1 after regardless)
           line_body_plus_one=`grep -n "<body>" $file | cut -f 1 -d ":" | head -n 1`
-          line_body_plus_one=$((line_body_plus_one + 1))
           
           where_to_add=${line_where_to_add_plus_one:-$line_body_plus_one}
           where_to_add=$((where_to_add - 1))

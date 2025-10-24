@@ -150,7 +150,7 @@ jobs:
         run: git pull
           
       - name: Release apk if hashes are different
-        #if: ${{ env.current_hash != env.new_hash }}
+        if: ${{ env.current_hash != env.new_hash }}
         id: release-apk
         uses: softprops/action-gh-release@v2
         with:

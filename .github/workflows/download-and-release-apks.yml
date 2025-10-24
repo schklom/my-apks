@@ -151,15 +151,17 @@ jobs:
           
       - name: Release apk if hashes are different
         #if: ${{ env.current_hash != env.new_hash }}
-        if: false
         id: release-apk
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.tagname }}
           body: "New version of ${{ matrix.app }}"
           files: ${{ env.apk_file_path }}
-
+      
       - name: debug url
+        run: echo "${{ steps.release-apk.outputs }}"
+
+      - name: debug url 1
         run: echo "${{ steps.release-apk.outputs.assets }}"
 
       - name: debug url 2

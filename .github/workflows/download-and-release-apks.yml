@@ -188,7 +188,7 @@ jobs:
           line_body_plus_one=`grep -n "<body>" $file | cut -f 1 -d ":" | head -n 1`
           
           where_to_add=${line_where_to_add_plus_one:-$line_body_plus_one}
-          where_to_add=$((where_to_add - 1))
+          where_to_add=$((where_to_add - 2))
 
           # Debug
           echo "cat $file"
@@ -212,7 +212,7 @@ jobs:
           
 
           # Add the line
-          sed -i "${where_to_add}i"<(echo "$what_to_add") $file
+          sed -i "${where_to_add}r"<(echo "$what_to_add") $file
 
 
 

@@ -94,7 +94,8 @@ jobs:
       - name: Store md5 hash of new apk
         if: ${{ env.current_version != env.new_version }}
         run: |
-          md5sum "${{ env.apk_file_path }}" | cut -d " " -f 1 | tee -a ${{ env.apk_dir_path }}/hash_new_file "$GITHUB_ENV"
+          md5sum "${{ env.apk_file_path }}" | cut -d " " -f 1 | tee -a ${{ env.apk_dir_path }}/hash_new_file
+          echo "new_hash=$(cat ${{ env.apk_dir_path }}/hash_new_file)" >> "$GITHUB_ENV"
       
       - name: Record last update date and update current hash+version
         if: ${{ env.current_version != env.new_version }}

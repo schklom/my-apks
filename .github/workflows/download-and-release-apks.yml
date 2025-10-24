@@ -164,7 +164,7 @@ jobs:
         if: ${{ env.current_hash != env.new_hash }}
         run: |
           file="docs/index.html"
-          url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
+          url="${{ steps.release-apk.outputs.assets)[0].browser_download_url }}"
           what_to_add="    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>"
 
           # Add before existing links if they exist

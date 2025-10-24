@@ -184,5 +184,5 @@ jobs:
         if: ${{ env.current_hash != env.new_hash }}
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "Update ${{ matrix.app }}'s hash and update date"
+          commit_message: "Update ${{ matrix.app }}'s hash and update date and add link to docs/index.html"
           file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/last_update_date docs/index.html'

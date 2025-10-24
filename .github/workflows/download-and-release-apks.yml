@@ -168,7 +168,8 @@ jobs:
 
           # Add before existing links if they exist
           line_where_to_add=`grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":" | head -n 1`
-
+          line_where_to_add=$((line_where_to_add - 1))
+          
           # if none exists, add after <body> (before that line+1, so that we can apply -1 after regardless)
           line_body=`grep -n "<body>" $file | cut -f 1 -d ":" | head -n 1`
           
@@ -176,8 +177,6 @@ jobs:
 
           # Add the line
           sed -i "${where_to_add}r"<(echo "$what_to_add") $file
-
-
 
           echo 'cat $file'
           cat "$file"

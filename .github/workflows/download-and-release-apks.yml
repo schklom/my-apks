@@ -175,6 +175,27 @@ jobs:
           where_to_add=${line_where_to_add_plus_one:-$line_body_plus_one}
           where_to_add=$((where_to_add - 1))
 
+          # Debug
+          echo "cat $file"
+          cat $file
+
+          echo 'echo $line_where_to_add_plus_one'
+          echo "$line_where_to_add_plus_one"
+
+          echo 'echo $line_body_plus_one'
+          echo "$line_body_plus_one"
+
+          echo 'echo $where_to_add'
+          echo "$where_to_add"
+
+          echo 'echo $url'
+          echo "$url"
+
+          echo 'echo $what_to_add'
+          echo "$what_to_add"
+
+          
+
           # Add the line
           sed -i "${where_to_add}i"<(echo "$what_to_add") $file
           

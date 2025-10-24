@@ -150,7 +150,8 @@ jobs:
         run: git pull
           
       - name: Release apk if hashes are different
-        if: ${{ env.current_hash != env.new_hash }}
+        #if: ${{ env.current_hash != env.new_hash }}
+        if: false
         id: release-apk
         uses: softprops/action-gh-release@v2
         with:
@@ -160,7 +161,8 @@ jobs:
 
       # https://github.com/marketplace/actions/gh-release#outputs
       - name: Add the download link to docs/index.html
-        if: ${{ env.current_hash != env.new_hash }}
+        #if: ${{ env.current_hash != env.new_hash }}
+        if: false
         run: |
           file="docs/index.html"
           url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"

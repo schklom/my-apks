@@ -159,6 +159,18 @@ jobs:
           body: "New version of ${{ matrix.app }}"
           files: ${{ env.apk_file_path }}
 
+      - name: debug url
+        run: echo "${{ steps.release-apk.outputs.assets }}"
+
+      - name: debug url 2
+        run: echo "${{ fromJSON(steps.release-apk.outputs.assets) }}"
+
+      - name: debug url 3
+        run: echo "${{ fromJSON(steps.release-apk.outputs.assets)[0] }}"
+
+      - name: debug url 3
+        run: echo "${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
+
       # https://github.com/marketplace/actions/gh-release#outputs
       - name: Add the download link to docs/index.html
         if: ${{ env.current_hash != env.new_hash }}

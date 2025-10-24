@@ -79,7 +79,6 @@ jobs:
           echo "current_version=$(cat ${{ env.apk_dir_path }}/version_current_file)" | tee -a "$GITHUB_ENV"
           echo "new_version=$(cat ${{ env.apk_dir_path }}/version_new_file)" | tee -a "$GITHUB_ENV"
           echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" | tee -a "$GITHUB_ENV"
-          echo "new_hash=$(cat ${{ env.apk_dir_path }}/hash_new_file)" | tee -a "$GITHUB_ENV"
 
       - name: Get APK
         if: ${{ env.current_version != env.new_version }}
@@ -95,7 +94,7 @@ jobs:
       - name: Store md5 hash of new apk
         if: ${{ env.current_version != env.new_version }}
         run: |
-          md5sum "${{ env.apk_file_path }}" | cut -d " " -f 1 > ${{ env.apk_dir_path }}/hash_new_file
+          md5sum "${{ env.apk_file_path }}" | cut -d " " -f 1 | tee -a ${{ env.apk_dir_path }}/hash_new_file "$GITHUB_ENV"
       
       - name: Record last update date and update current hash+version
         if: ${{ env.current_version != env.new_version }}

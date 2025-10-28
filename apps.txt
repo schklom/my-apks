@@ -11,3 +11,4 @@ com.okcupid.okcupid
 com.pof.android
 com.theone.theoneapp
 com.tinder
+com.app.tgtg

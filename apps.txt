@@ -12,3 +12,4 @@ com.pof.android
 com.theone.theoneapp
 com.tinder
 com.app.tgtg
+com.sainsburys.gol

@@ -3,7 +3,7 @@ name: Download and release APKs
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '2 0 * * MON,WED,FRI,SUN'
+    - cron:  '0 0 * * *'
     
   push:
     branches: main
@@ -192,6 +192,18 @@ jobs:
 
           echo 'cat $file'
           cat "$file"
+
+      - name: Delete links of APKs older than 5 releases ago
+        if: ${{ env.current_version != env.new_version }}
+        run: |
+          file="docs/index.html"
+          # grep -> line number
+          # tail -> start after line 5 (from line 6)
+          # no need to sort, the new links are added to the bottom, so the oldest are at the bottom
+          # cut -> grep returns "22: xxxxxxxxxxx", so get the line number
+          # sed appends the letter d, because delete on line 2 is sed "2d"
+          # sed -> apply all the "2d\n3d\n..." to the file
+          grep -n "${{ matrix.app }}" ${file} | tail -n +6 | cut -d ":" -f 1 | sed "s/$/d/" | sed -i -f - ${file}
           
       
       - name: Commit and push the change

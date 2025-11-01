@@ -83,9 +83,20 @@ jobs:
       - name: Get APK
         if: ${{ env.current_version != env.new_version }}
         run: |
+          
+          # https://github.com/EFForg/apkeep/blob/master/USAGE-google-play.md
+          
+          #./apkeep \
+          #  -a ${{ matrix.app }} \
+          #  -d apk-pure \
+          #  ${{ env.apk_dir_path }}
+          
           ./apkeep \
             -a ${{ matrix.app }} \
-            -d apk-pure \
+            -d google-play \
+            -o device=px_9a \
+            -e ${{ secrets.APKEEP_EMAIL }} \
+            -t ${{ secrets.APKEEP_AAS_TOKEN }} \
             ${{ env.apk_dir_path }}
 
           file_path=`ls ${{ env.apk_dir_path }}/*apk`

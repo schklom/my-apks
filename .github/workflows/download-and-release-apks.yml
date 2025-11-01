@@ -83,14 +83,9 @@ jobs:
       - name: Get APK
         if: ${{ env.current_version != env.new_version }}
         run: |
-          
+          # Try downloading via Google Play
           # https://github.com/EFForg/apkeep/blob/master/USAGE-google-play.md
-          
-          #./apkeep \
-          #  -a ${{ matrix.app }} \
-          #  -d apk-pure \
-          #  ${{ env.apk_dir_path }}
-          
+          echo "Downloading via Google Play"
           ./apkeep \
             -a ${{ matrix.app }} \
             -d google-play \
@@ -98,6 +93,19 @@ jobs:
             -e ${{ secrets.APKEEP_EMAIL }} \
             -t ${{ secrets.APKEEP_AAS_TOKEN }} \
             ${{ env.apk_dir_path }}
+
+          # If Google Play did not work (no apk or xapk file), fallback to APKPure
+          # https://github.com/EFForg/apkeep/blob/master/USAGE-apkpure.md
+          if [[ ! (-e ${{ env.apk_dir_path }}/*.apk || ${{ env.apk_dir_path }}/*.xapk) ]]; then
+            echo "Downloading via APKPure"
+            echo "ls -lhR ${{ env.apk_dir_path }}"
+            ls -lhR ${{ env.apk_dir_path }}
+            ./apkeep \
+              -a ${{ matrix.app }} \
+              -d apk-pure \
+              -o 'arch=arm64-v8a';
+              ${{ env.apk_dir_path }}
+          fi
 
           file_path=`ls ${{ env.apk_dir_path }}/*apk`
           echo "apk_file_path=${file_path}" | tee -a "$GITHUB_ENV"

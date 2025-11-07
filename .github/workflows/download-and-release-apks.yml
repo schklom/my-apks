@@ -227,17 +227,16 @@ jobs:
       - name: Delete releases and tags older than 5 releases/tags
         run: |
           git ls-remote https://github.com/schklom/my-apks | grep "${{ matrix.app }}" | head -n -5 | sed "s|.*refs/tags/||g" | while read -r tag; do
-
             # oneliner is harder to debug and read
             # echo "Deleting release and tag with tag name: $tag"
             # gh release delete "$tag" --cleanup-tag --yes || git push --delete origin "$tag"
             
             # Check if a release for the tag exists
-            if gh release view "$TAG" > /dev/null 2>&1; then
-              echo "Release for tag '$TAG' found. Deleting release and tag."
+            if gh release view "$tag" > /dev/null 2>&1; then
+              echo "Release for tag '$tag' found. Deleting release and tag."
               gh release delete "$tag" --cleanup-tag --yes
             else
-              echo "No release found for tag '$TAG'. Deleting only the tag."
+              echo "No release found for tag '$tag'. Deleting only the tag."
               git push --delete origin "$tag"
             fi
           done

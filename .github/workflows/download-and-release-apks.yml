@@ -19,6 +19,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   list-apps:
@@ -82,7 +86,6 @@ jobs:
 
       - name: Get APK
         if: ${{ env.current_version != env.new_version }}
-        shell: bash
         run: |
           # Try downloading via Google Play
           # https://github.com/EFForg/apkeep/blob/master/USAGE-google-play.md

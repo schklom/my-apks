@@ -82,6 +82,7 @@ jobs:
 
       - name: Get APK
         if: ${{ env.current_version != env.new_version }}
+        shell: bash
         run: |
           # Try downloading via Google Play
           # https://github.com/EFForg/apkeep/blob/master/USAGE-google-play.md

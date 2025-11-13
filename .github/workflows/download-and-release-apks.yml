@@ -100,7 +100,7 @@ jobs:
 
           # If Google Play did not work (no apk or xapk file), fallback to APKPure
           # https://github.com/EFForg/apkeep/blob/master/USAGE-apkpure.md
-          if [[ ! -e ${{ env.apk_dir_path }}/*.apk && ! -e ${{ env.apk_dir_path }}/*.xapk ]]; then
+          if ! find "${{ env.apk_dir_path }}" -maxdepth 1 \( -name '*.apk' -o -name '*.xapk' \) | grep -q .; then
             echo "Downloading via APKPure"
             echo "ls -lhR ${{ env.apk_dir_path }}"
             ls -lhR ${{ env.apk_dir_path }}

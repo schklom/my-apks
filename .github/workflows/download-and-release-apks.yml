@@ -103,7 +103,7 @@ jobs:
             ./apkeep \
               -a ${{ matrix.app }} \
               -d apk-pure \
-              -o 'arch=arm64-v8a';
+              -o 'arch=arm64-v8a' \
               ${{ env.apk_dir_path }}
           fi
 

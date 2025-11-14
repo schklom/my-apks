@@ -207,6 +207,15 @@ jobs:
           echo 'echo $what_to_add'
           echo "$what_to_add"
 
+          echo 'grep -n ".*${{ matrix.app }}.*" $file'
+          grep -n ".*${{ matrix.app }}.*" $file
+
+          echo 'grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":"'
+          grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":"
+
+          echo 'grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":" | head -n 1'
+          grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":" | head -n 1
+
           # Add before existing links if they exist
           line_where_to_add=`grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":" | head -n 1`
           line_where_to_add=${line_where_to_add:+$((line_where_to_add - 1))}

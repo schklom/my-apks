@@ -111,8 +111,8 @@ jobs:
               ${{ env.apk_dir_path }}
           fi
 
-          echo "ls -lhR"
-          ls -lhR
+          echo "ls -lhR ${{ env.apk_dir_path }}"
+          ls -lhR ${{ env.apk_dir_path }}
           
           file_path=`ls ${{ env.apk_dir_path }}/*apk`
           echo "apk_file_path=${file_path}" | tee -a "$GITHUB_ENV"

@@ -13,3 +13,5 @@ com.theone.theoneapp
 com.tinder
 com.app.tgtg
 com.sainsburys.gol
+eu.ifinsurance.app.no
+com.nhs.online.nhsonline

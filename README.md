@@ -36,4 +36,6 @@ https://apkpure.com/okcupid-dating-app/com.okcupid.okcupid \
 https://apkpure.com/smitten-dating-app/com.theone.theoneapp \
 https://apkpure.com/tinder-dating-app-meet-chat/com.tinder \
 https://apkpure.com/too-good-to-go-end-food-waste/com.app.tgtg \
-https://apkpure.com/sainsbury-s-groceries/com.sainsburys.gol
+https://apkpure.com/sainsbury-s-groceries/com.sainsburys.gol \
+If Travel missing on APKPure \
+https://apkpure.com/nhs-app/com.nhs.online.nhsonline

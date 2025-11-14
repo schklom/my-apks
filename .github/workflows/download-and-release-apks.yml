@@ -204,14 +204,27 @@ jobs:
           url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
           what_to_add="    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>"
 
+          echo 'echo $what_to_add'
+          echo "$what_to_add"
+
           # Add before existing links if they exist
           line_where_to_add=`grep -n ".*${{ matrix.app }}.*" $file | cut -f 1 -d ":" | head -n 1`
           line_where_to_add=${line_where_to_add:+$((line_where_to_add - 1))}
+
+          echo 'echo $line_where_to_add'
+          echo "$line_where_to_add"
           
           # if none exists, add after <body> (before that line+1, so that we can apply -1 after regardless)
           line_body=`grep -n "<body>" $file | cut -f 1 -d ":" | head -n 1`
+
+          echo 'echo $line_body'
+          echo "$line_body"
           
           where_to_add=${line_where_to_add:-$line_body}
+
+          echo 'echo $where_to_add'
+          echo "$where_to_add"
+          
 
           # Add the line
           sed -i "${where_to_add}r"<(echo "$what_to_add") $file

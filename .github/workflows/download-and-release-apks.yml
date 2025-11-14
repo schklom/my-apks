@@ -209,6 +209,11 @@ jobs:
           echo 'echo $what_to_add'
           echo "$what_to_add"
 
+          set -x
+
+          echo 'grep -En ".*${{ matrix.app }}.*" $file'
+          grep -En ".*${{ matrix.app }}.*" $file
+
           echo 'grep -n ".*${{ matrix.app }}.*" $file'
           grep -n ".*${{ matrix.app }}.*" $file
 

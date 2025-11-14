@@ -43,9 +43,7 @@ jobs:
     strategy:
       fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
-        #app: ${{ fromJSON(needs.list-apps.outputs.apps) }}
-        app:
-          - com.nhs.online.nhsonline
+        app: ${{ fromJSON(needs.list-apps.outputs.apps) }}
       max-parallel: 1 # Ensure commits and releases don't happen simultaneously
 
     permissions:

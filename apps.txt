@@ -14,3 +14,4 @@ com.tinder
 com.app.tgtg
 com.sainsburys.gol
 com.nhs.online.nhsonline
+com.myvodafoneapp

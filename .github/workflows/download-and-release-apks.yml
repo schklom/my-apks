@@ -69,9 +69,10 @@ jobs:
       - name: Download pup (in case app is not on APKPure, for version check)
         run: |
           # https://github.com/ericchiang/pup
-          curl -s https://api.github.com/repos/ericchiang/pup/releases/latest | \
-            grep -o 'https.*linux_amd64.zip' | \
-            curl -sSL -o pup.zip
+          URL=$(curl -s https://api.github.com/repos/ericchiang/pup/releases/latest | \
+                grep -o 'https.*linux_amd64.zip')
+          echo "URL=$URL"
+          curl -sSL -o pup.zip "${URL}"
           command -v unzip || sudo apt install -y unzip # install unzip if not available
           unzip pup.zip
           ls -ahl

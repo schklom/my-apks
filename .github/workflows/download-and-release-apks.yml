@@ -66,6 +66,17 @@ jobs:
           curl -sSL -o apkeep "https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu"
           chmod +x apkeep
 
+      - name: Download pup (in case app is not on APKPure, for version check)
+        run: |
+          # https://github.com/ericchiang/pup
+          curl -s https://api.github.com/repos/ericchiang/pup/releases/latest | \
+            grep -o 'https.*linux_amd64.zip' | \
+            curl -sSL -o pup.zip
+          command -v unzip || sudo apt install -y unzip # install unzip if not available
+          unzip pup.zip
+          ls -ahl
+          chmod +x pup
+
       - name: Prepare folder
         run: |
           echo "apk_dir_path=${{ matrix.app }}" | tee -a "$GITHUB_ENV"
@@ -73,7 +84,19 @@ jobs:
 
       - name: Store version of new apk
         run: |
-          ./apkeep -a ${{ matrix.app }} -l . | tail -n 1 | grep -oP '[\d+.]+' | sort -V | tail -n 1 > ${{ env.apk_dir_path }}/version_new_file
+          PLAY_URL="https://play.google.com/store/apps/details?id=${{ matrix.app }}"
+          ./apkeep -a ${{ matrix.app }} -l . | \
+            tail -n 1 | \
+            grep -oP '[\d+.]+' | \
+            sort -V | \
+            tail -n 1 > ${{ env.apk_dir_path }}/version_new_file || \ # if it crashes
+            curl -s -L -A "Mozilla/5.0" "${PLAY_URL}" > html
+          echo "cat html"
+          cat html
+          cat html \ |
+            pup 'div:contains("Version") + div text{}' > ${{ env.apk_dir_path }}/version_new_file
+          echo "cat version_new_file"
+          cat ${{ env.apk_dir_path }}/version_new_file
 
       - name: Get current and new version of apk
         run: |

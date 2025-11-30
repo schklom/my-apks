@@ -67,13 +67,14 @@ jobs:
           chmod +x apkeep
 
       - name: Download pup (in case app is not on APKPure, for version check)
+        if: false
         run: |
           # https://github.com/ericchiang/pup
           URL=$(curl -s https://api.github.com/repos/ericchiang/pup/releases/latest | \
                 grep -o 'https.*linux_amd64.zip')
           echo "URL=$URL"
-          curl -sSL -o pup.zip "${URL}"
-          command -v unzip || sudo apt install -y unzip # install unzip if not available
+          curl -L -o pup.zip "${URL}"
+          sudo apt install -y unzip
           unzip pup.zip
           ls -ahl
           chmod +x pup

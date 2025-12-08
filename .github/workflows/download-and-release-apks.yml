@@ -233,8 +233,8 @@ jobs:
           file="docs/index.html"
           # Old. This sometimes is a URL that contains "untagged" and therefore doesn't work
           #url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
-          
-          url="https://github.com/${{ github.repository }}/releases/download/${{ env.tagname }}/${{ matrix.app }}${{ env.file_extension }}"
+          https://github.com/schklom/my-apks/releases/download/app.android.cloaked_2.67.0_2025-12-05_16-41/app.android.cloaked.apk
+          url="https://github.com/${{ github.repository }}/releases/download/${{ env.tagname }}/${{ matrix.app }}.${{ env.file_extension }}"
           what_to_add="    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>"
 
           # If an app link already exists

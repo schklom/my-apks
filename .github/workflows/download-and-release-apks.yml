@@ -231,7 +231,10 @@ jobs:
         if: ${{ env.current_version != env.new_version }}
         run: |
           file="docs/index.html"
-          url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
+          # Old. This sometimes is a URL that contains "untagged" and therefore doesn't work
+          #url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
+          
+          url="https://github.com/${{ github.repository }}/releases/download/${{ env.tagname }}/${{ matrix.app }}${{ env.file_extension }}"
           what_to_add="    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>"
 
           # If an app link already exists

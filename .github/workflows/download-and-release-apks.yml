@@ -253,8 +253,8 @@ jobs:
             where_to_add=`grep -n "${{ matrix.app }}" "${file}" | cut -f 1 -d ":" | head -n 1`
             where_to_add=$((where_to_add - 1))
           else
-            # If not, then insert at the top of the page
-            where_to_add=`grep -n "<body>" "${file}" | cut -f 1 -d ":" | head -n 1`
+            # If not, then insert at the top of the page, after "<br />"
+            where_to_add=`grep -n "<br />" "${file}" | cut -f 1 -d ":" | head -n 1`
           fi
 
           echo 'echo $where_to_add'

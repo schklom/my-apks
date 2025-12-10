@@ -175,8 +175,13 @@ jobs:
           file_dir=$(dirname "$file_path")
           file_extension=${{ env.file_extension }}
           apk_file_path="$file_dir/${{ matrix.app }}.$file_extension"
-          echo "apk_file_path=$apk_file_path" | tee -a "$GITHUB_ENV"
-          mv "$file_path" "$apk_file_path"
+          oldname="$file_path"
+          newname="$apk_file_path"
+          if [ "$oldname" != "$newname" ]; then
+            echo "apk_file_path=$apk_file_path" | tee -a "$GITHUB_ENV"
+            echo "Renaming $oldname to $newname"
+            mv "$oldname" "$newname"
+          fi
       
 #      # https://code.whatever.social/questions/13469147/get-android-apk-file-versionname-or-versioncode-without-installing-apk
 #      - name: Find version number

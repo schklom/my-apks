@@ -123,8 +123,7 @@ jobs:
           ./apkeep \
             -a ${{ matrix.app }} \
             -d google-play \
-            -o device=px_9a \
-            -o split_apk=true \
+            -o device=px_9a,split_apk=true \
             -e ${{ secrets.APKEEP_EMAIL }} \
             -t ${{ secrets.APKEEP_AAS_TOKEN }} \
             ${{ env.apk_dir_path }}

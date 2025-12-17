@@ -120,14 +120,15 @@ jobs:
           # Try downloading via Google Play
           # https://github.com/EFForg/apkeep/blob/master/USAGE-google-play.md
           echo "Downloading via Google Play"
+          # -o device=px_9a,split_apk=true \
           ./apkeep \
             -a ${{ matrix.app }} \
             -d google-play \
-            # -o device=px_9a,split_apk=true \
             -o device=px_9a \
             -e ${{ secrets.APKEEP_EMAIL }} \
             -t ${{ secrets.APKEEP_AAS_TOKEN }} \
             ${{ env.apk_dir_path }}
+
 
           # If Google Play did not work (no apk or xapk file), fallback to APKPure
           # https://github.com/EFForg/apkeep/blob/master/USAGE-apkpure.md

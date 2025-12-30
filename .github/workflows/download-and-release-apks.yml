@@ -102,7 +102,7 @@ jobs:
             #  pup 'div:contains("Updated on") + div text{}' > ${{ env.apk_dir_path }}/version_new_file
             #echo "cat version_new_file"
             #cat ${{ env.apk_dir_path }}/version_new_file
-            stop 1
+            exit 1
           fi
       
       - name: Get current and new version of apk

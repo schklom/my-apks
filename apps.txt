@@ -7,7 +7,7 @@ co.feeld
 com.flashgap.fruitz
 com.ftw_and_co.happn
 co.hinge.app
-com.okcupid.okcupid
+# com.okcupid.okcupid
 com.pof.android
 com.theone.theoneapp
 com.tinder

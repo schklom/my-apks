@@ -17,3 +17,4 @@ com.nhs.online.nhsonline
 com.myvodafoneapp
 app.android.cloaked
 com.microsoft.android.smsorganizer
+# eu.ifinsurance.app.no

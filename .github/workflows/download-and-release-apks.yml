@@ -279,12 +279,12 @@ jobs:
         run: |
           file="docs/index.html"
           # grep -> line number
-          # tail -> start after line 5 (from line 6)
+          # tail -> start after line 2 (from line 3)
           # no need to sort, the new links are added to the bottom, so the oldest are at the bottom
           # cut -> grep returns "22: xxxxxxxxxxx", so get the line number
           # sed appends the letter d, because delete on line 2 is sed "2d"
           # sed -> apply all the "2d\n3d\n..." to the file
-          grep -n "${{ matrix.app }}" ${file} | tail -n +6 | cut -d ":" -f 1 | sed "s/$/d/" | sed -i -f - ${file}
+          grep -n "${{ matrix.app }}" ${file} | tail -n +3 | cut -d ":" -f 1 | sed "s/$/d/" | sed -i -f - ${file}
           
       - name: Delete releases and tags older than 2 releases/tags
         if: ${{ env.current_version != env.new_version }}

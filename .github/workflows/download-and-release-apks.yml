@@ -286,10 +286,10 @@ jobs:
           # sed -> apply all the "2d\n3d\n..." to the file
           grep -n "${{ matrix.app }}" ${file} | tail -n +6 | cut -d ":" -f 1 | sed "s/$/d/" | sed -i -f - ${file}
           
-      - name: Delete releases and tags older than 5 releases/tags
+      - name: Delete releases and tags older than 2 releases/tags
         if: ${{ env.current_version != env.new_version }}
         run: |
-          git ls-remote https://github.com/schklom/my-apks | grep "${{ matrix.app }}" | head -n -5 | sed "s|.*refs/tags/||g" | while read -r tag; do
+          git ls-remote https://github.com/schklom/my-apks | grep "${{ matrix.app }}" | head -n -2 | sed "s|.*refs/tags/||g" | while read -r tag; do
             # oneliner is harder to debug and read
             # echo "Deleting release and tag with tag name: $tag"
             # gh release delete "$tag" --cleanup-tag --yes || git push --delete origin "$tag"

@@ -275,7 +275,7 @@ jobs:
           cat "$file"
 
       - name: Delete links of APKs older than 5 releases ago
-        #if: ${{ env.current_version != env.new_version }}
+        if: ${{ env.current_version != env.new_version }}
         run: |
           file="docs/index.html"
           # grep -> line number
@@ -287,7 +287,7 @@ jobs:
           grep -n "${{ matrix.app }}" ${file} | tail -n +3 | cut -d ":" -f 1 | sed "s/$/d/" | sed -i -f - ${file}
           
       - name: Delete releases and tags older than 2 releases/tags
-        #if: ${{ env.current_version != env.new_version }}
+        if: ${{ env.current_version != env.new_version }}
         run: |
           git ls-remote https://github.com/schklom/my-apks | grep "${{ matrix.app }}" | head -n -2 | sed "s|.*refs/tags/||g" | while read -r tag; do
             # oneliner is harder to debug and read
@@ -307,7 +307,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Commit and push the change
-        #if: ${{ env.current_version != env.new_version }}
+        if: ${{ env.current_version != env.new_version }}
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Update ${{ matrix.app }}'s hash and version update date and add link to docs/index.html"

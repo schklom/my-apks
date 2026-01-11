@@ -34,7 +34,8 @@ jobs:
       - name: set-matrix
         id: set-matrix
         run: |
-          app_list=$(cat apps.txt | jq -R -s -c 'split("\n")[:-1]')
+          # list apps, ignore lines starting with "#"
+          app_list=$(cat apps.txt | sed '/^#/d' | jq -R -s -c 'split("\n")[:-1]')
           echo "apps=${app_list}" | tee -a "$GITHUB_OUTPUT"
   
   release:

@@ -31,6 +31,14 @@ jobs:
       apps: ${{ steps.set-matrix.outputs.apps }}
     steps:
       - uses: actions/checkout@v5
+      - name: debug app list
+        run: |
+          echo "cat apps.txt"
+          cat apps.txt
+
+          echo "cat apps.txt | sed '/^#/d'"
+          cat apps.txt | sed '/^#/d'
+          
       - name: set-matrix
         id: set-matrix
         run: |

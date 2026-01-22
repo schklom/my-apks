@@ -38,6 +38,8 @@ jobs:
           echo "cat apps.txt"
           cat apps.txt
 
+          echo
+          echo
           echo "cat apps.txt | sed '/^#/d'"
           cat apps.txt | sed '/^#/d'
           

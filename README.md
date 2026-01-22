@@ -42,4 +42,5 @@ https://apkpure.com/sainsbury-s-groceries/com.sainsburys.gol \
 If Travel missing on APKPure \
 https://apkpure.com/nhs-app/com.nhs.online.nhsonline \
 My Vodafone missing on APKPure \
-https://apkpure.com/sms-organizer/com.microsoft.android.smsorganizer
+https://apkpure.com/sms-organizer/com.microsoft.android.smsorganizer \
+TapSOS missing on APKPure

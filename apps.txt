@@ -18,3 +18,4 @@ com.nhs.online.nhsonline
 app.android.cloaked
 com.microsoft.android.smsorganizer
 # eu.ifinsurance.app.no
+com.inclutech.tapsosapp

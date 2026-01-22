@@ -19,3 +19,4 @@ app.android.cloaked
 com.microsoft.android.smsorganizer
 # eu.ifinsurance.app.no
 com.inclutech.tapsosapp
+# Keep a last empty line, because it gets removed in the Action

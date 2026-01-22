@@ -7,10 +7,15 @@ co.feeld
 com.flashgap.fruitz
 com.ftw_and_co.happn
 co.hinge.app
-com.okcupid.okcupid
+# com.okcupid.okcupid
 com.pof.android
 com.theone.theoneapp
 com.tinder
 com.app.tgtg
 com.sainsburys.gol
 com.nhs.online.nhsonline
+# com.myvodafoneapp
+app.android.cloaked
+com.microsoft.android.smsorganizer
+# eu.ifinsurance.app.no
+com.inclutech.tapsosapp

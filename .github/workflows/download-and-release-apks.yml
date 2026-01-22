@@ -30,11 +30,22 @@ jobs:
     outputs:
       apps: ${{ steps.set-matrix.outputs.apps }}
     steps:
+
       - uses: actions/checkout@v6
+      
+      - name: debug app list
+        run: |
+          echo "cat apps.txt"
+          cat apps.txt
+
+          echo "cat apps.txt | sed '/^#/d'"
+          cat apps.txt | sed '/^#/d'
+          
       - name: set-matrix
         id: set-matrix
         run: |
-          app_list=$(cat apps.txt | jq -R -s -c 'split("\n")[:-1]')
+          # list apps, ignore lines starting with "#"
+          app_list=$(cat apps.txt | sed '/^#/d' | jq -R -s -c 'split("\n")[:-1]')
           echo "apps=${app_list}" | tee -a "$GITHUB_OUTPUT"
   
   release:
@@ -66,6 +77,19 @@ jobs:
           curl -sSL -o apkeep "https://github.com/EFForg/apkeep/releases/latest/download/apkeep-x86_64-unknown-linux-gnu"
           chmod +x apkeep
 
+      - name: Download pup (in case app is not on APKPure, for version check)
+        if: false
+        run: |
+          # https://github.com/ericchiang/pup
+          URL=$(curl -s https://api.github.com/repos/ericchiang/pup/releases/latest | \
+                grep -o 'https.*linux_amd64.zip')
+          echo "URL=$URL"
+          curl -L -o pup.zip "${URL}"
+          sudo apt install -y unzip
+          unzip pup.zip
+          ls -ahl
+          chmod +x pup
+
       - name: Prepare folder
         run: |
           echo "apk_dir_path=${{ matrix.app }}" | tee -a "$GITHUB_ENV"
@@ -73,8 +97,25 @@ jobs:
 
       - name: Store version of new apk
         run: |
-          ./apkeep -a ${{ matrix.app }} -l . | tail -n 1 | grep -oP '[\d+.]+' | sort -V | tail -n 1 > ${{ env.apk_dir_path }}/version_new_file
-
+          PLAY_URL="https://play.google.com/store/apps/details?id=${{ matrix.app }}"
+          crash=0
+          ./apkeep -a ${{ matrix.app }} -l . | \
+            tail -n 1 | \
+            grep -oP '[\d+.]+' | \
+            sort -V | \
+            tail -n 1 > ${{ env.apk_dir_path }}/version_new_file || crash=1 # if it crashes
+          if [[ crash -eq 1 ]]; then
+            echo "APKeep crashed, app is likely not listed on APKPure"
+            #curl -s -L "${PLAY_URL}" > html
+            #echo "cat html"
+            #cat html
+            #cat html \ |
+            #  pup 'div:contains("Updated on") + div text{}' > ${{ env.apk_dir_path }}/version_new_file
+            #echo "cat version_new_file"
+            #cat ${{ env.apk_dir_path }}/version_new_file
+            exit 1
+          fi
+      
       - name: Get current and new version of apk
         run: |
           # Create current files if they don't exist
@@ -82,7 +123,7 @@ jobs:
           touch ${{ env.apk_dir_path }}/version_current_file
           echo "current_version=$(cat ${{ env.apk_dir_path }}/version_current_file)" | tee -a "$GITHUB_ENV"
           echo "new_version=$(cat ${{ env.apk_dir_path }}/version_new_file)" | tee -a "$GITHUB_ENV"
-          echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" | tee -a "$GITHUB_ENV"
+          echo "current_hash=$(cat ${{ env.apk_dir_path }}/hash_current_file)" | tee -a "$GITHUB_ENV"          
 
       - name: Get APK
         if: ${{ env.current_version != env.new_version }}
@@ -90,6 +131,7 @@ jobs:
           # Try downloading via Google Play
           # https://github.com/EFForg/apkeep/blob/master/USAGE-google-play.md
           echo "Downloading via Google Play"
+          # -o device=px_9a,split_apk=true \
           ./apkeep \
             -a ${{ matrix.app }} \
             -d google-play \
@@ -97,6 +139,7 @@ jobs:
             -e ${{ secrets.APKEEP_EMAIL }} \
             -t ${{ secrets.APKEEP_AAS_TOKEN }} \
             ${{ env.apk_dir_path }}
+
 
           # If Google Play did not work (no apk or xapk file), fallback to APKPure
           # https://github.com/EFForg/apkeep/blob/master/USAGE-apkpure.md
@@ -136,6 +179,22 @@ jobs:
         run: |
           file=${{ env.apk_file_path }}
           echo "file_extension=${file##*.}" | tee -a "$GITHUB_ENV"
+
+      - name: Rename file
+        if: ${{ env.current_version != env.new_version }}
+        run: |
+          file_path=${{ env.apk_file_path }}
+          file_name=$(basename "$file_path")
+          file_dir=$(dirname "$file_path")
+          file_extension=${{ env.file_extension }}
+          apk_file_path="$file_dir/${{ matrix.app }}.$file_extension"
+          oldname="$file_path"
+          newname="$apk_file_path"
+          if [ "$oldname" != "$newname" ]; then
+            echo "apk_file_path=$apk_file_path" | tee -a "$GITHUB_ENV"
+            echo "Renaming $oldname to $newname"
+            mv "$oldname" "$newname"
+          fi
       
 #      # https://code.whatever.social/questions/13469147/get-android-apk-file-versionname-or-versioncode-without-installing-apk
 #      - name: Find version number
@@ -201,7 +260,10 @@ jobs:
         if: ${{ env.current_version != env.new_version }}
         run: |
           file="docs/index.html"
-          url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
+          # Old. This sometimes is a URL that contains "untagged" and therefore doesn't work
+          #url="${{ fromJSON(steps.release-apk.outputs.assets)[0].browser_download_url }}"
+          
+          url="https://github.com/${{ github.repository }}/releases/download/${{ env.tagname }}/${{ matrix.app }}.${{ env.file_extension }}"
           what_to_add="    <li><a href=${url}>${{ env.tagname }}.${{ env.file_extension }}</a></li>"
 
           # If an app link already exists
@@ -209,8 +271,8 @@ jobs:
             where_to_add=`grep -n "${{ matrix.app }}" "${file}" | cut -f 1 -d ":" | head -n 1`
             where_to_add=$((where_to_add - 1))
           else
-            # If not, then insert at the top of the page
-            where_to_add=`grep -n "<body>" "${file}" | cut -f 1 -d ":" | head -n 1`
+            # If not, then insert at the top of the page, after "<br />"
+            where_to_add=`grep -n "<br />" "${file}" | cut -f 1 -d ":" | head -n 1`
           fi
 
           echo 'echo $where_to_add'
@@ -227,17 +289,17 @@ jobs:
         run: |
           file="docs/index.html"
           # grep -> line number
-          # tail -> start after line 5 (from line 6)
+          # tail -> start after line 2 (from line 3)
           # no need to sort, the new links are added to the bottom, so the oldest are at the bottom
           # cut -> grep returns "22: xxxxxxxxxxx", so get the line number
           # sed appends the letter d, because delete on line 2 is sed "2d"
           # sed -> apply all the "2d\n3d\n..." to the file
-          grep -n "${{ matrix.app }}" ${file} | tail -n +6 | cut -d ":" -f 1 | sed "s/$/d/" | sed -i -f - ${file}
+          grep -n "${{ matrix.app }}" ${file} | tail -n +3 | cut -d ":" -f 1 | sed "s/$/d/" | sed -i -f - ${file}
           
-      - name: Delete releases and tags older than 5 releases/tags
+      - name: Delete releases and tags older than 2 releases/tags
         if: ${{ env.current_version != env.new_version }}
         run: |
-          git ls-remote https://github.com/schklom/my-apks | grep "${{ matrix.app }}" | head -n -5 | sed "s|.*refs/tags/||g" | while read -r tag; do
+          git ls-remote https://github.com/schklom/my-apks | grep "${{ matrix.app }}" | head -n -2 | sed "s|.*refs/tags/||g" | while read -r tag; do
             # oneliner is harder to debug and read
             # echo "Deleting release and tag with tag name: $tag"
             # gh release delete "$tag" --cleanup-tag --yes || git push --delete origin "$tag"
@@ -259,4 +321,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Update ${{ matrix.app }}'s hash and version update date and add link to docs/index.html"
-          file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/version_current_file ${{ env.apk_dir_path }}/last_update_date docs/index.html'
+          #file_pattern: '${{ env.apk_dir_path }}/hash_current_file ${{ env.apk_dir_path }}/version_current_file ${{ env.apk_dir_path }}/last_update_date docs/index.html'
+          file_pattern: '${{ env.apk_dir_path }}/last_update_date docs/index.html'

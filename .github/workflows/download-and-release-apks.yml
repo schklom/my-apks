@@ -256,6 +256,8 @@ jobs:
           tag_name: ${{ env.tagname }}
           body: "New version of ${{ matrix.app }}"
           files: ${{ env.apk_file_path }}
+          draft: false
+          latest: true
 
       # https://github.com/marketplace/actions/gh-release#outputs
       - name: Add the download link to docs/index.html

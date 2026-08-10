@@ -31,7 +31,7 @@ jobs:
       apps: ${{ steps.set-matrix.outputs.apps }}
     steps:
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       
       - name: debug app list
         run: |
@@ -66,7 +66,7 @@ jobs:
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download apkeep
         run: |
